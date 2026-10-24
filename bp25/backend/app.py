@@ -106,3 +106,73 @@ def process_allocation():
             for route_id, nodes in routes.items():
                 for node in nodes:
                     node_to_route[node] = route_id
+
+            # Generate colors for each route
+            route_colors = {}
+            for route_id in routes.keys():
+              
+                while True:
+                    # Generate a random color with more saturated values
+                    r = random.randint(20, 180)
+                    g = random.randint(20, 180)
+                    b = random.randint(20, 180)
+                    
+                    if max(r, g, b) < 120:
+                        continue
+                        
+                    # Make sure the color isn't too light overall (lower threshold)
+                    if (r + g + b) > 450:
+                        continue
+            
+                    color = "#{:02x}{:02x}{:02x}".format(r, g, b)
+                    route_colors[route_id] = color
+                    break
+        else:
+            routes = {}
+            route_lengths = {}
+            node_to_route = {}
+            route_colors = {}
+        
+        route_display_ids = {}
+        for i, route_id in enumerate(routes.keys(), 1):
+            route_display_ids[route_id] = i
+        
+        nodes_data = []
+        for node_id, node_data in graph.nodes(data=True):
+            if 'x' in node_data and 'y' in node_data:
+                node_type = node_data.get('node_type', 'street')
+                node_info = {
+                    'id': str(node_id),
+                    'lat': node_data['y'],
+                    'lng': node_data['x'],
+                    'type': node_type
+                }
+                
+                if node_id in node_to_route:
+                    route_id = node_to_route[node_id]
+                    node_info['route_id'] = str(route_id)
+                    node_info['route_color'] = route_colors[route_id]
+                
+                nodes_data.append(node_info)
+        
+        # Extract edges
+        edges_data = []
+        edges_with_route_color = 0
+        for u, v, data in graph.edges(data=True):
+            # Skip edges without both nodes having coordinates
+            if ('x' in graph.nodes[u] and 'y' in graph.nodes[u] and 
+                'x' in graph.nodes[v] and 'y' in graph.nodes[v]):
+                edge_type = 'perpendicular' if data.get('is_perpendicular_edge', False) else 'street'
+                
+                edge_info = {
+                    'source': str(u),
+                    'target': str(v),
+                    'type': edge_type
+                }
+                
+                # Check if either node is a building in a route
+                building_node = None
+                for node in [u, v]:
+                    if node in node_to_route and graph.nodes[node].get('node_type') == 'building':
+                        building_node = node
+                        break
