@@ -137,3 +137,31 @@ def create_graph(bounding_coords):
         building_node_id, projection_node_id, leng, perp_line = add_perp(G_combined, bnode)
         edges_to_add.append((building_node_id, projection_node_id, leng, perp_line))
 
+
+    for building_node_id, projection_node_id, leng, perp_line in edges_to_add:
+        G_combined.add_edge(building_node_id, projection_node_id,
+                            length=1e-10,
+                            geometry=perp_line,
+                            is_perpendicular_edge=True)
+        G_combined.add_edge(projection_node_id, building_node_id,
+                            length=1e-10,
+                            geometry=perp_line,
+                            is_perpendicular_edge=True)
+
+    # print([n for n in G_combined.neighbors(-1)])
+    # print("Added building centroids as nodes and connected them to the street network.")
+
+    return G_combined
+
+
+# Plot the combined graph: For visualization, we can plot street nodes and color building nodes differently.
+def display_graph(G, save=False):
+    node_colors = ['royalblue' if G.nodes[node].get('node_type') == 'building' else 'red' if G.nodes[node].get('node_type') == 'fire_station' else 'slategray' for node in G.nodes]
+    ox.plot_graph(G, node_size=10, show=True, close=False, save=save, filepath='graph.png', bgcolor='white', node_color=node_colors, edge_color='black')
+
+
+if __name__ == '__main__':
+    north, south, east, west = 34.1418976, 34.13, -118.1330033, -118.14
+    bbox = (north, south, east, west)
+    G_combined = create_graph(bbox)
+    display_graph(G_combined, save=True)
