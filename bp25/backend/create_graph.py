@@ -26,3 +26,31 @@ def get_closest_perp(G, point):
         point_u = Point(G.nodes[u]['x'], G.nodes[u]['y'])
         point_v = Point(G.nodes[v]['x'], G.nodes[v]['y'])
         edge_geom = LineString([point_u, point_v])
+
+    # Compute the projection of the point onto the edge geometry.
+    projected_distance = edge_geom.project(point)
+    projection_point = edge_geom.interpolate(projected_distance)
+
+    # Create the perpendicular line segment from the point (building centroid) to the projection point.
+    perpendicular_line = LineString([point, projection_point])
+
+    # return u, v, key, perpendicular_line, projection_point, edge_geom
+    return perpendicular_line, projection_point, u, v
+
+
+def add_perp(G_combined, building_node_id):
+    """
+    Given a combined graph (with building nodes added) and a building node ID,
+    compute the perpendicular edge to the nearest street edge and add it to the graph.
+    """
+    # Retrieve the building node's coordinates.
+    building_data = G_combined.nodes[building_node_id]
+    building_point = Point(building_data['x'], building_data['y'])
+
+    # Find nearest street edge and compute the perpendicular line.
+    perp_line, proj_point, u, v = get_closest_perp(G_combined, building_point)
+
+    # Create a new node for the projection point.
+    # Use a unique id (e.g., a negative number or use a naming scheme).
+    projection_node_id = f"proj_{building_node_id}"
+    G_combined.add_node(projection_node_id, x=proj_point.x, y=proj_point.y, node_type='projection')
