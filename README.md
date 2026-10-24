@@ -3,37 +3,37 @@
 Winning project of MIT 2025 Blueprint Hackathon, General Division 
 
 ## Inspiration
-Natural disasters take the front page of the news constantly. They are relentless, unpredictable, and difficult to manage. In times of crisis, efficient response efforts can mean the difference between life and death. In the most recent LA wildfires, 29 people passed away with countless more experiencing casualties. Inefficient responses to natural crises like these can result in families losing loved ones as well as the destruction that could have been prevented. Witnessing the devastation caused by these tragic events motivated us to create a system that helps emergency services allocate resources effectively to mitigate damage and prioritize safety.
+Natural disasters take the front page of the news constantly. They are relentless, unpredictable, and difficult to manage. In times of crisis, efficient response efforts can mean the difference between life and death. In the most recent LA wildfires, 29 people passed away with countless more experiencing casualties. Inefficient responses to natural crises like these can result in families losing loved ones as well as the destruction that could have been prevented. Witnessing the devastation caused by these tragic events motivated me to create a system that helps emergency services allocate resources effectively to mitigate damage and prioritize safety.
 
-When disaster strikes, responders need a clear strategy to ensure help reaches those in need as quickly as possible. However, the chaotic nature of emergencies often makes real-time decision-making difficult. Our project aims to bridge this gap by optimizing emergency response through a responsive mapping system that enables emergency responders to strategically deploy resources, ensuring faster and more effective aid distribution.
+When disaster strikes, responders need a clear strategy to ensure help reaches those in need as quickly as possible. However, the chaotic nature of emergencies often makes real-time decision-making difficult. My project aims to bridge this gap by optimizing emergency response through a responsive mapping system that enables emergency responders to strategically deploy resources, ensuring faster and more effective aid distribution.
 
 
 ## What it does
-Our project provides a dynamic, data-driven, optimal routing system for first-responders to minimize the maximum time it takes to reach a potential victim. To do this, we represent the streetview as a graph: nodes are placed on buildings and road intersections, while edges represent roads and streets. 
+My project provides a dynamic, data-driven, optimal routing system for first-responders to minimize the maximum time it takes to reach a potential victim. To do this, I represent the streetview as a graph: nodes are placed on buildings and road intersections, while edges represent roads and streets. 
 
-To generate our optimal routing system, we formulate this task as a programming problem: Given N starting points, how can we partition the set of building nodes into N routes so that the maximum length of any path is minimized? 
+To generate my optimal routing system, I formulate this task as a programming problem: Given N starting points, how can I partition the set of building nodes into N routes so that the maximum length of any path is minimized? 
 
 For the N = 1 case, this already reduces to the Traveler’s Salesman Problem, a well-known NP-Hard Problem. This shows that for even small N, this problem is highly nontrivial, and there is definitely a necessity for optimization to ensure that the most lives are saved. 
 
-To solve this in the general case, we use a technique known as Simulated Annealing which takes a base solution and performs localized operations. These localized operations induce a change or “entropy” in how good the solution is. We always accept better solutions, but we also accept worse solutions with a probability that decreases over time (this variable is controlled through a “Temperature”). 
+To solve this in the general case, I use a technique known as Simulated Annealing which takes a base solution and performs localized operations. These localized operations induce a change or “entropy” in how good the solution is. I always accept better solutions, but I also accept worse solutions with a probability that decreases over time (this variable is controlled through a “Temperature”). 
 
-To be more precise, we account for three “localized operations” that we can perform on an existing solution. 
+To be more precise, I account for three “localized operations” that I can perform on an existing solution. 
 1. Range Reversal on an arbitrary subarray of locations in a route
 2. Removing and replacing a location from one route into another
 3. Removing and replacing a location in a route within itself
 
-To obtain a sufficiently optimal base solution, we code a custom greedy algorithm. At each time step, we take the current path with the minimum length, use a Dijkstra-esque BFS to find the closest unvisited building, and traverse to that building. After we generate this solution, we further optimize upon it with the aforementioned simulated annealing. We find that on average, simulated annealing reduces the maximum path length generated by the greedy algorithm by a staggering **10.9%**, showing the efficacy of the algorithm at saving lives.
+To obtain a sufficiently optimal base solution, I code a custom greedy algorithm. At each time step, I take the current path with the minimum length, use a Dijkstra-esque BFS to find the closest unvisited building, and traverse to that building. After I generate this solution, I further optimize upon it with the aforementioned simulated annealing. I find that on average, simulated annealing reduces the maximum path length generated by the greedy algorithm by a staggering **10.9%**, showing the efficacy of the algorithm at saving lives.
 
-Although this static approach is good, fires and other natural disasters are extremely dynamic environments, with roads suddenly becoming inaccessible. To account for this, every time our graph is updated with new information, we run a **mini simulated annealing** (i.e. re-raising the temperature slightly) to let the routing converge to a new local minimum efficiently. 
+Although this static approach is good, fires and other natural disasters are extremely dynamic environments, with roads suddenly becoming inaccessible. To account for this, every time my graph is updated with new information, I run a **mini simulated annealing** (i.e. re-raising the temperature slightly) to let the routing converge to a new local minimum efficiently. 
 
 In fire-affected areas, nodes within the impacted radius are automatically removed, ensuring teams avoid hazardous zones and focus their efforts on reachable locations. This allows for real-time adaptability to changing disaster conditions, improving safety and efficiency.
 
 Additionally, responders can manually delete nodes and edges, updating the map to reflect roadblocks, damaged structures, or newly accessible paths. This level of customization ensures that emergency teams can quickly adjust their strategies, responding with greater precision.
 
-By integrating these features, our system enhances emergency response efforts in order to maximize the impact of relief operations.
+By integrating these features, my system enhances emergency response efforts in order to maximize the impact of relief operations.
 
 
-## How we built it
+## How I built it
 
 ### Frontend:
 * **React Leaflet:**
@@ -56,40 +56,40 @@ By integrating these features, our system enhances emergency response efforts in
     * Used to have live updates for fires, and also used to calculate approximate radius of fires
 
 
-## Challenges we ran into
+## Challenges I ran into
 
 #### Simulated Annealing
 
-The simulated annealing was difficult to get to converge. Initially, we only considered the range reversal operations, but we had to add Inter and Intra route swapping to truly make the simulated annealing approach work effectively.
+The simulated annealing was difficult to get to converge. Initially, I only considered the range reversal operations, but I had to add Inter and Intra route swapping to truly make the simulated annealing approach work effectively.
 
 #### One-Way Roads
 
-Ideally, the path from Point A to B should be the same as from B to A. However, one-way roads created errors in our model. We resolved this issue by disregarding one-way restrictions, as emergency vehicles can bypass them when necessary. This issue took a very long time to debug :(
+Ideally, the path from Point A to B should be the same as from B to A. However, one-way roads created errors in my model. I resolved this issue by disregarding one-way restrictions, as emergency vehicles can bypass them when necessary. This issue took a very long time to debug :(
 
 #### Connecting Roads to Buildings
 
-It’s necessary to connect buildings to the closest roads to add them to the graph, but this required us to introduce extraneous “projection” nodes in our graph and use extensive linear algebra to properly make this approach function
+It’s necessary to connect buildings to the closest roads to add them to the graph, but this required me to introduce extraneous “projection” nodes in my graph and use extensive linear algebra to properly make this approach function
 
 #### FIRMS API
 
-Due to time constraints, we weren’t able to fully incorporate real-time updated wildfire data. However we were still able to use old “up to date” data.
+Due to time constraints, I wasn’t able to fully incorporate real-time updated wildfire data. However, I was still able to use old “up to date” data.
 
 #### No fire stations:
-There should fire stations for evacuation purposes in the bounding box. However, several times in our bounding box we found that there were no fire stations in the area. To solve this issue, we expanded the search for fire stations to up to 25 km away from the box. Then, these stations would start from the closest building in the bounding box to their stations, since often during emergencies fire stations will arrive from several different locations. We didn’t have time to implement this, so for now random points are chosen to be the fire stations.
+There should fire stations for evacuation purposes in the bounding box. However, several times in my bounding box I found that there were no fire stations in the area. To solve this issue, I expanded the search for fire stations to up to 25 km away from the box. Then, these stations would start from the closest building in the bounding box to their stations, since often during emergencies fire stations will arrive from several different locations. I didn’t have time to implement this, so for now random points are chosen to be the fire stations.
 
-## Accomplishments that we're proud of
+## Accomplishments that I'm proud of
 
 #### Successfully Implementing Simulated Annealing
   - Getting simulated annealing to converge was a major challenge.  
-  - Initially, we only considered range reversal operations, but it wasn’t enough.  
-  - To make the approach work effectively, we incorporated inter- and intra-route swapping.  
+  - Initially, I only considered range reversal operations, but it wasn’t enough.  
+  - To make the approach work effectively, I incorporated inter- and intra-route swapping.  
   - This optimization improved routing efficiency and reduced the maximum path length by 10.9% on average.  
 
 
 #### Overcoming the One-Way Street Dilemma
-  - Ideally, Point A to B should be the same as B to A, but one-way roads created errors in our model.  
+  - Ideally, Point A to B should be the same as B to A, but one-way roads created errors in my model.  
   - Debugging this issue took significant effort.  
-  - We ultimately resolved it by disregarding one-way restrictions, as emergency vehicles can bypass them when necessary.  
+  - I ultimately resolved it by disregarding one-way restrictions, as emergency vehicles can bypass them when necessary.  
 
 
 #### Dynamic Node Removal for Real-Time Adaptability 
@@ -98,22 +98,22 @@ There should fire stations for evacuation purposes in the bounding box. However,
   - The system continuously adapts to changing disaster conditions, improving response efficiency and safety. 
 
 
-## What we learned
+## What I learned
 
-Our program relied heavily on the representation and formulation of real-world problems in a way that could be programmatically understood through graph traversals. 
+My program relied heavily on the representation and formulation of real-world problems in a way that could be programmatically understood through graph traversals. 
 
-We learned how to effectively use simulated annealing to properly address the traveling salesman problem.
+I learned how to effectively use simulated annealing to properly address the traveling salesman problem.
 
-We learned how to use Flask in conjunction with a Python backend to effectively make a coherent architecture.
+I learned how to use Flask in conjunction with a Python backend to effectively make a coherent architecture.
 
-We learned about interactions between real world data and how to incorporate that into a dynamically updating system. Furthermore, we worked on how different requests worked in conjunction with scripts in the backend.
+I learned about interactions between real world data and how to incorporate that into a dynamically updating system. Furthermore, I worked on how different requests worked in conjunction with scripts in the backend.
 
 
-## What's next for our project
-We plan to expand our project to recognize other types of disasters, such as flooding. For instance, in cases of flooding, we would remove nodes from areas with high water elevation or low geographical elevation in places where vehicles and people are more likely in critical danger. We hope to enhance our platform’s adaptability, ensuring it can effectively assist emergency responders in various disaster scenarios. 
+## What's next for my project
+I plan to expand my project to recognize other types of disasters, such as flooding. For instance, in cases of flooding, I would remove nodes from areas with high water elevation or low geographical elevation in places where vehicles and people are more likely in critical danger. I hope to enhance my platform’s adaptability, ensuring it can effectively assist emergency responders in various disaster scenarios. 
 
-In addition, due to time constraints we weren’t able to fully incorporate dynamic updating of wildfire data. While we were able to use some wildfire data from Nasa Fire Information Resource Management System on the spread of wildfires, this wasn’t dynamically updated. Moreover, while our system is largely responsive, future work could include taking into account a risk index to natural disaster to also be able to shift to preventative action. 
+In addition, due to time constraints I wasn’t able to fully incorporate dynamic updating of wildfire data. While I was able to use some wildfire data from Nasa Fire Information Resource Management System on the spread of wildfires, this wasn’t dynamically updated. Moreover, while my system is largely responsive, future work could include taking into account a risk index to natural disaster to also be able to shift to preventative action. 
 
-Additionally, we thought about adding an AR/VR component to allow emergency responders to navigate their communities before these events even happen, improving preparation. Just as we conduct fire drills and establish fire escape plans, this feature could help responders simulate disaster scenarios and plan accordingly. For example, while an emergency response vehicle is moving onto the scene, they would be able to see through a display the suggested course of navigation. 
+Additionally, I thought about adding an AR/VR component to allow emergency responders to navigate their communities before these events even happen, improving preparation. Just as I conduct fire drills and establish fire escape plans, this feature could help responders simulate disaster scenarios and plan accordingly. For example, while an emergency response vehicle is moving onto the scene, they would be able to see through a display the suggested course of navigation. 
 
-Another idea for expansion is refining our designated boundaries. Instead of using a simple rectangular area, we aim to implement a more custom polygonal boundary system, increasing the precision of coverage and resource allocation.
+Another idea for expansion is refining my designated boundaries. Instead of using a simple rectangular area, I aim to implement a more custom polygonal boundary system, increasing the precision of coverage and resource allocation.
