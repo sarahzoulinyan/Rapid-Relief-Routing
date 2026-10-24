@@ -709,3 +709,36 @@ function App() {
       setProcessingError('No area selected for processing');
       return;
     }
+
+    setIsProcessing(true);
+    setProcessingError('');
+    
+    try {
+      const [[south, west], [north, east]] = boundingBox;
+      
+      // Call backend API to process allocation
+      const response = await fetch(`${API_BASE_URL}/api/process-allocation`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          bbox: [north, south, east, west],
+          location_name: locationName,
+          fires: fires // Send the fires data to the backend
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
+      
+      const result = await response.json();
+      setAllocationResult(result);
+    } catch (err) {
+      console.error('Allocation processing error:', err);
+      setProcessingError(err instanceof Error ? err.message : "Unknown error occurred");
+    } finally {
+      setIsProcessing(false);
+    }
+  };
