@@ -149,3 +149,29 @@ def anneal(G, routes, route_lengths, T):
                 # Update the stored route length.
                 route_lengths[route_key] += delta
                 # [Explanation: New length = old length + (added - removed)]
+
+        # Identify the route with the largest current length (source route for removal).
+        largest_key = max(route_lengths, key=lambda k: route_lengths[k])
+        # Choose destination route: with 70% probability, pick a random route; otherwise, use the largest route.
+        if random.random() < 0.7:
+            dest_key = random.choice(list(routes.keys()))
+        else:
+            dest_key = largest_key
+
+        # Two cases: if the move is within the same route (intra-route relocation) or between different routes.
+        if dest_key == largest_key:
+            # --- Intra-route relocation ---
+            src_route = routes[largest_key]
+            L = len(src_route)
+            if L < 3:
+                return  # Not enough nodes to perform a meaningful move.
+            # Choose a random index in the interior (not endpoints) to remove.
+            orig_idx = random.randint(1, L - 2)
+            node_to_move = src_route[orig_idx]
+            # Create a temporary route with the node removed.
+            new_route = src_route[:orig_idx] + src_route[orig_idx + 1:]
+
+            # Choose an insertion index in new_route (again, not at endpoints).
+            if len(new_route) < 3:
+                return  # Safety check.
+            dest_idx = random.randint(1, len(new_route) - 1)
