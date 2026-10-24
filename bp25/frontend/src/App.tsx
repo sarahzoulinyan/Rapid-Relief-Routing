@@ -742,3 +742,187 @@ function App() {
       setIsProcessing(false);
     }
   };
+
+  const fetchFireData = async () => {
+    if (!mapLocation) {
+      alert('Please search for a location first');
+      return;
+    }
+    
+    setIsLoadingFires(true);
+    setFireError('');
+    
+    try {
+      const buffer = 10.0; 
+      const north = mapLocation[0] + buffer;
+      const south = mapLocation[0] - buffer;
+      const east = mapLocation[1] + buffer;
+      const west = mapLocation[1] - buffer;
+      
+      console.log("Using coordinates for fire search:", { north, south, east, west });
+      
+      const today = new Date();
+      const sixtyDaysAgo = new Date(today);
+      sixtyDaysAgo.setDate(today.getDate() - 60);
+      
+      const formatDate = (date: Date) => {
+        return date.toISOString().split('T')[0];
+      };
+      
+      // NASA FIRMS API URL
+      const apiKey = process.env.REACT_APP_FIRMS_API_KEY;
+      if (!apiKey) {
+        throw new Error('REACT_APP_FIRMS_API_KEY is not configured');
+      }
+      const url = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${apiKey}/MODIS_NRT/${west},${south},${east},${north}/${formatDate(sixtyDaysAgo)}..${formatDate(today)}`;
+      
+      console.log("Fetching fire data from URL:", url);
+      
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch fire data: ${response.status}`);
+      }
+      
+      const text = await response.text();
+      console.log("Raw CSV response:", text);
+      
+      if (!text.includes(',') || !text.includes('\n')) {
+        console.log("No data from API, creating test data from highest risk location");
+        
+        // Find highest risk location near the current map location
+        const highestRiskLocation: any = await findHighestRiskLocation(mapLocation[0], mapLocation[1]);
+        
+        if (highestRiskLocation) {
+          // Create a test fire at the highest risk location
+          const testData = [{
+            latitude: parseFloat(highestRiskLocation.LATITUDE),
+            longitude: parseFloat(highestRiskLocation.LONGITUDE),
+            acq_date: formatDate(new Date()),
+            acq_time: "1500",
+            satellite: "Test",
+            confidence: "High",
+            daynight: "D",
+            risk_score: highestRiskLocation.RISK_SCORE,
+            census_tract: highestRiskLocation.CENSUS_TRACT_ID
+          }];
+          
+          setFires(testData);
+          alert(`No real fire data available. Created a test fire at the highest risk location (Risk Score: ${highestRiskLocation.RISK_SCORE}).`);
+        } else {
+          // Fallback to a test fire at the current location
+          const testData = [{
+            latitude: mapLocation[0],
+            longitude: mapLocation[1],
+            acq_date: formatDate(new Date()),
+            acq_time: "1500",
+            satellite: "Test",
+            confidence: "High",
+            daynight: "D"
+          }];
+          
+          setFires(testData);
+          alert("No real fire data or risk data available. Created a test fire at the current location.");
+        }
+        
+        setIsLoadingFires(false);
+        return;
+      }
+      
+      const parsedData = parseCSV(text);
+      console.log("Parsed fire data:", parsedData);
+      
+      if (parsedData && parsedData.length > 0) {
+        setFires(parsedData);
+        alert(`Found ${parsedData.length} active fires in the search area!`);
+      } else {
+        console.log("No fires found in the parsed data, creating a test fire at the highest risk location");
+        
+        const highestRiskLocation: any = await findHighestRiskLocation(mapLocation[0], mapLocation[1]);
+        
+        if (highestRiskLocation) {
+          const testData = [{
+            latitude: parseFloat(highestRiskLocation.LATITUDE),
+            longitude: parseFloat(highestRiskLocation.LONGITUDE),
+            acq_date: formatDate(new Date()),
+            acq_time: "1500",
+            satellite: "Test",
+            confidence: "High",
+            daynight: "D",
+            risk_score: highestRiskLocation.RISK_SCORE,
+            census_tract: highestRiskLocation.CENSUS_TRACT_ID
+          }];
+          
+          setFires(testData);
+          alert(`No real fire data available. Created a test fire at the highest risk location (Risk Score: ${highestRiskLocation.RISK_SCORE}).`);
+        } else {
+          const testData = [{
+            latitude: mapLocation[0],
+            longitude: mapLocation[1],
+            acq_date: formatDate(new Date()),
+            acq_time: "1500",
+            satellite: "Test",
+            confidence: "High",
+            daynight: "D"
+          }];
+          
+          setFires(testData);
+          alert("No real fire data or risk data available. Created a test fire at the current location.");
+        }
+      }
+    } catch (err) {
+      console.error('Error fetching fire data:', err);
+      setFireError(err instanceof Error ? err.message : 'Failed to fetch fire data');
+      
+      try {
+        const highestRiskLocation: any = await findHighestRiskLocation(mapLocation[0], mapLocation[1]);
+        
+        if (highestRiskLocation) {
+          const testData = [{
+            latitude: parseFloat(highestRiskLocation.LATITUDE),
+            longitude: parseFloat(highestRiskLocation.LONGITUDE),
+            acq_date: new Date().toISOString().split('T')[0],
+            acq_time: "1500",
+            satellite: "Test",
+            confidence: "High",
+            daynight: "D",
+            risk_score: highestRiskLocation.RISK_SCORE,
+            census_tract: highestRiskLocation.CENSUS_TRACT_ID
+          }];
+          
+          setFires(testData);
+          alert(`Error fetching fire data. Created a test fire at the highest risk location (Risk Score: ${highestRiskLocation.RISK_SCORE}).`);
+        } else {
+          const testData = [{
+            latitude: mapLocation[0],
+            longitude: mapLocation[1],
+            acq_date: new Date().toISOString().split('T')[0],
+            acq_time: "1500",
+            satellite: "Test",
+            confidence: "High",
+            daynight: "D"
+          }];
+          
+          setFires(testData);
+          alert("Error fetching fire data and no risk data available. Created a test fire at the current location.");
+        }
+      } catch (highRiskErr) {
+        console.error('Error creating high-risk test fire:', highRiskErr);
+        
+        const testData = [{
+          latitude: mapLocation[0],
+          longitude: mapLocation[1],
+          acq_date: new Date().toISOString().split('T')[0],
+          acq_time: "1500",
+          satellite: "Test",
+          confidence: "High",
+          daynight: "D"
+        }];
+        
+        setFires(testData);
+        alert("Multiple errors occurred. Created a test fire at the current location.");
+      }
+    } finally {
+      setIsLoadingFires(false);
+    }
+  };
