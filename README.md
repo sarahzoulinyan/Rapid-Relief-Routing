@@ -73,3 +73,33 @@ It’s necessary to connect buildings to the closest roads to add them to the gr
 #### FIRMS API
 
 Due to time constraints, we weren’t able to fully incorporate real-time updated wildfire data. However we were still able to use old “up to date” data.
+
+#### No fire stations:
+There should fire stations for evacuation purposes in the bounding box. However, several times in our bounding box we found that there were no fire stations in the area. To solve this issue, we expanded the search for fire stations to up to 25 km away from the box. Then, these stations would start from the closest building in the bounding box to their stations, since often during emergencies fire stations will arrive from several different locations. We didn’t have time to implement this, so for now random points are chosen to be the fire stations.
+
+## Accomplishments that we're proud of
+
+#### Successfully Implementing Simulated Annealing
+  - Getting simulated annealing to converge was a major challenge.  
+  - Initially, we only considered range reversal operations, but it wasn’t enough.  
+  - To make the approach work effectively, we incorporated inter- and intra-route swapping.  
+  - This optimization improved routing efficiency and reduced the maximum path length by 10.9% on average.  
+
+
+#### Overcoming the One-Way Street Dilemma
+  - Ideally, Point A to B should be the same as B to A, but one-way roads created errors in our model.  
+  - Debugging this issue took significant effort.  
+  - We ultimately resolved it by disregarding one-way restrictions, as emergency vehicles can bypass them when necessary.  
+
+
+#### Dynamic Node Removal for Real-Time Adaptability 
+  - Instead of manual updates, fire-affected nodes are automatically removed from the graph.  
+  - This ensures that emergency responders avoid hazardous zones and focus on accessible locations.  
+  - The system continuously adapts to changing disaster conditions, improving response efficiency and safety. 
+
+
+## What we learned
+
+Our program relied heavily on the representation and formulation of real-world problems in a way that could be programmatically understood through graph traversals. 
+
+We learned how to effectively use simulated annealing to properly address the traveling salesman problem.
