@@ -131,3 +131,21 @@ def anneal(G, routes, route_lengths, T):
             # Choose indices l and r such that 0 < l < r < L-1.
             l = random.randint(1, L - 3)
             r = random.randint(l + 1, L - 2)
+
+            # For the reversal move, only two edges are affected:
+            #   * The edge from route[l-1] to route[l] will be removed.
+            #   * The edge from route[r] to route[r+1] will be removed.
+            # And they will be replaced by:
+            #   * An edge from route[l-1] to route[r].
+            #   * An edge from route[l] to route[r+1].
+            removed = dist(G, route[l - 1], route[l]) + dist(G, route[r], route[r + 1])
+            added = dist(G, route[l - 1], route[r]) + dist(G, route[l], route[r + 1])
+            delta = added - removed  # Delta change in the route's length
+
+            # Update: Accept if improvement (delta < 0) or with probability exp(-delta/T)
+            if delta < 0 or random.random() < exp(-delta / T):
+                # Reverse the subsegment from index l to r.
+                routes[route_key][l:r + 1] = routes[route_key][l:r + 1][::-1]
+                # Update the stored route length.
+                route_lengths[route_key] += delta
+                # [Explanation: New length = old length + (added - removed)]
