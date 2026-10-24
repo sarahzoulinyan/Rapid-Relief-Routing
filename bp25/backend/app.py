@@ -17,3 +17,6 @@ except ImportError:
 import networkx as nx
 import random
 import osmnx as ox
+
+app = Flask(__name__)
+CORS(app)
