@@ -926,3 +926,211 @@ function App() {
       setIsLoadingFires(false);
     }
   };
+
+  return (
+    <ChakraProvider value={defaultSystem}>
+      <Box className="app-background" minHeight="100vh" py={8}>
+        <Container maxW="container.md">
+          <VStack align="center" mb={8}>
+            <Heading as="h1" size="2xl" color="teal.600">
+              Dispatch Services
+            </Heading>
+            <Text fontSize="lg" color="gray.600" textAlign="center">
+              Intelligent allocation of emergency services during natural disasters.
+            </Text>
+            
+            <Flex mt={2} gap={4}>
+              <Button 
+                variant="outline" 
+                color="teal.500" 
+                onClick={() => setShowAbout(true)}
+                borderWidth="2px"
+                borderColor="teal.500"
+                _hover={{ bg: "teal.500", color: "white" }}
+              >
+                Learn More
+              </Button>
+              
+              <Button 
+                variant="outline" 
+                color="teal.500" 
+                onClick={() => setShowMethodology(true)}
+                borderWidth="2px"
+                borderColor="teal.500"
+                _hover={{ bg: "teal.500", color: "white" }}
+              >
+                Methodology
+              </Button>
+            </Flex>
+          </VStack>
+          
+          <Box 
+            bg="white" 
+            p={8} 
+            borderRadius="lg" 
+            boxShadow="lg"
+            width="100%" 
+            maxWidth="500px" 
+            mx="auto"
+            mb={6}
+          >
+            <VStack>
+              <Input
+                placeholder="Enter location (e.g., Los Angeles, CA)"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                size="lg"
+                onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+              />
+              <Button 
+                onClick={handleSearch} 
+                colorScheme="teal" 
+                width="100%"
+                size="lg"
+                _hover={{ bg: "teal.500" }}
+                loading={isLoading}
+              >
+                Search
+              </Button>
+              {error && <Text color="red.500">{error}</Text>}
+            </VStack>
+          </Box>
+          
+          {isLoading && (
+            <Box textAlign="center" mt={8}>
+              <Spinner size="xl" color="teal.500" />
+              <Text mt={2}>Searching for location...</Text>
+            </Box>
+          )}
+          
+          {mapLocation && (
+            <>
+              <Box 
+                width="100%" 
+                height="600px" 
+                borderRadius="lg" 
+                overflow="hidden" 
+                boxShadow="lg" 
+                mt={6}
+                mb={4}
+                position="relative"
+              >
+                <Text 
+                  position="absolute" 
+                  top="10px" 
+                  left="50%" 
+                  transform="translateX(-50%)" 
+                  bg="rgba(255,255,255,0.8)" 
+                  px={3} 
+                  py={1} 
+                  borderRadius="md" 
+                  zIndex={1000}
+                  fontSize="sm"
+                >
+                  Move the map to position the red box over your target area
+                </Text>
+                <MapContainer 
+                  center={mapLocation} 
+                  zoom={13} 
+                  style={{ height: '100%', width: '100%' }}
+                  zoomDelta={0.35}
+                  zoomSnap={0.35}
+                  wheelPxPerZoomLevel={100}
+                >
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <Marker position={mapLocation}>
+                    <Popup>
+                      <Text fontWeight="bold">{locationName}</Text>
+                    </Popup>
+                  </Marker>
+                  <FixedBoundingBox onBoundsChange={setBoundingBox} />
+                  {allocationResult && allocationResult.graph_data && (
+                    <GraphVisualization 
+                      graphData={allocationResult.graph_data} 
+                      fires={fires}
+                    />
+                  )}
+                  {allocationResult && allocationResult.fire_stations && (
+                    <FireStationMarkers stations={allocationResult.fire_stations} />
+                  )}
+                  {fires.length > 0 && (
+                    <FireMarkers fires={fires} />
+                  )}
+                </MapContainer>
+              </Box>
+              
+              <Flex width="100%" maxWidth="500px" mx="auto" gap={4}>
+                <Button
+                  onClick={processAllocation}
+                  colorScheme="blue"
+                  size="lg"
+                  flex="1"
+                  loading={isProcessing}
+                  loadingText="Processing"
+                >
+                  Process Relief Route Allocation
+                </Button>
+                
+                <Button
+                  onClick={fetchFireData}
+                  colorScheme="red"
+                  size="lg"
+                  flex="1"
+                  loading={isLoadingFires}
+                  loadingText="Checking"
+                >
+                  Update On Fire Status
+                </Button>
+              </Flex>
+              
+              {processingError && (
+                <Text color="red.500" textAlign="center" mt={2}>
+                  {processingError}
+                </Text>
+              )}
+              
+              {isProcessing && (
+                <Box textAlign="center" mt={4}>
+                  <Text>Calculating optimal resource allocation...</Text>
+                </Box>
+              )}
+              
+              {allocationResult && (
+                <Box 
+                  mt={6} 
+                  p={6} 
+                  bg="white" 
+                  borderRadius="lg" 
+                  boxShadow="md"
+                >
+                  <Heading size="md" mb={4}>Allocation Results</Heading>
+                  <Text>
+                    The backend has processed the allocation for {locationName}.
+                  </Text>
+                  <Text mt={2}>
+                    Area processed: {allocationResult.bbox[0].toFixed(6)}, {allocationResult.bbox[2].toFixed(6)} to {allocationResult.bbox[1].toFixed(6)}, {allocationResult.bbox[3].toFixed(6)}
+                  </Text>
+                  <Text mt={2}>
+                    Network nodes: {allocationResult.nodes_count}
+                  </Text>
+                  <Text mt={2}>
+                    Network edges: {allocationResult.edges_count}
+                  </Text>
+                </Box>
+              )}
+            </>
+          )}
+        </Container>
+      </Box>
+      
+      {/* Render the About page when showAbout is true */}
+      {showAbout && <AboutPage onClose={() => setShowAbout(false)} />}
+      
+      {/* Render the Methodology page when showMethodology is true */}
+      {showMethodology && <MethodologyPage onClose={() => setShowMethodology(false)} />}
+    </ChakraProvider>
+  );
+}
