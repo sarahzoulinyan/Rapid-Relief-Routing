@@ -60,3 +60,36 @@ def get_init_solution(grf: MultiDiGraph, starting_pts):
     """
     Greedy initialization for multi-party TSP.
     starting_pts: list of nodes that serve as initial starting points for separate routes.
+
+    The algorithm works by maintaining one route per starting point.
+    At each iteration, the route with the smallest current length is chosen,
+    and extended by connecting (via the shortest path) its last node to the nearest unvisited building.
+    """
+    # Initialize routes and route lengths.
+    # routes: dict mapping starting_pt to list of nodes in that route.
+    routes = {pt: [pt] for pt in starting_pts}
+    pure_routes = {pt: [pt] for pt in starting_pts}
+    route_lengths = {pt: 0 for pt in starting_pts}
+
+    # All nodes with node_type "building" that we want to cover.
+    building_nodes = {node for node in grf.nodes() if grf.nodes[node].get("node_type") == "building"}
+    # Mark starting points as visited.
+    visited = set(starting_pts)
+
+    # Continue until all building nodes are visited or no extension is possible.
+    while visited != building_nodes:
+        # Choose the route with minimal current length.
+        best_start = min(route_lengths, key=lambda pt: route_lengths[pt])
+        current_route = routes[best_start]
+        last_node = current_route[-1]
+
+        # Find the nearest unvisited building from the last node.
+        result = nearest_unvisited_node(grf, last_node, visited)
+        if result is None:
+            # No reachable unvisited building found; break out.
+            break
+        next_node, dist, sub_path = result
+        pure_routes[best_start].append(next_node)
+        # sub_path is the shortest path from last_node to next_node.
+        # To avoid duplication, remove the first node (which equals last_node).
+        extension = sub_path[1:]
