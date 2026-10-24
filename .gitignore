@@ -1,0 +1,15 @@
+.venv
+.idea
+node_modules/
+__pycache__
+*.pyc
+.DS_Store
+.env
+*.env
+instance/
+.webassets-cache
+cache/
+bp25/frontend/public/data/NRI_Table_CensusTracts/NRI_Table_CensusTracts.csv
+bp25/backend/graph.png
+bp25/backend/osm_map.html
+bp25/backend/routes_animation.gif
