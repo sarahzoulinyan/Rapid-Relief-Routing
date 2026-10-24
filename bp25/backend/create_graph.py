@@ -54,3 +54,32 @@ def add_perp(G_combined, building_node_id):
     # Use a unique id (e.g., a negative number or use a naming scheme).
     projection_node_id = f"proj_{building_node_id}"
     G_combined.add_node(projection_node_id, x=proj_point.x, y=proj_point.y, node_type='projection')
+
+    G_combined.remove_edge(u, v)
+    if G_combined.has_edge(v, u):
+        G_combined.remove_edge(v, u)
+    distU = ((proj_point.x - G_combined.nodes[u]["x"]) ** 2 + (proj_point.y - G_combined.nodes[u]["y"]) ** 2) ** 0.5
+    distV = ((proj_point.x - G_combined.nodes[v]["x"]) ** 2 + (proj_point.y - G_combined.nodes[v]["y"]) ** 2) ** 0.5
+
+    G_combined.add_edge(projection_node_id, v, length=distV)
+    G_combined.add_edge(v, projection_node_id, length=distV)
+    G_combined.add_edge(projection_node_id, u, length=distU)
+    G_combined.add_edge(u, projection_node_id, length=distU)
+
+    return building_node_id, projection_node_id, perp_line.length, perp_line
+
+
+def create_graph(bounding_coords):
+    north, south, east, west = bounding_coords[0], bounding_coords[1], bounding_coords[2], bounding_coords[3]
+
+    # Download the street network (all road types) using correct parameter order
+    G = ox.graph_from_bbox((west, south, east, north), network_type='all')
+
+    edges_to_add = []
+
+    for edge in G.edges:
+        if not G.has_edge(edge[1], edge[0]):
+            edges_to_add.append((edge[1], edge[0], edge[2]))
+
+    for edge in edges_to_add:
+        G.add_edge(edge[0], edge[1], length=edge[2])
