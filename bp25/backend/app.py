@@ -189,3 +189,6 @@ def process_allocation():
         # After processing all edges, check if any building nodes in routes don't have colored connections
         building_nodes_in_routes = {node_id for node_id, node_data in graph.nodes(data=True) 
                                    if node_data.get('node_type') == 'building' and node_id in node_to_route}
+
+        # Track which building nodes have colored connections
+        buildings_with_colored_connections = set()
