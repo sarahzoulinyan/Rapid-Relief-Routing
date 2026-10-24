@@ -310,3 +310,50 @@ function FireMarkers({ fires }: { fires: any[] }) {
     </>
   );
 }
+
+function parseCSV(csvText: string) {
+  if (!csvText || csvText.trim() === '') {
+    console.log("Empty CSV text");
+    return [];
+  }
+  
+  const lines = csvText.trim().split('\n');
+  if (lines.length <= 1) {
+    console.log("CSV has only header or is empty");
+    return [];
+  }
+  
+  const headers = lines[0].split(',');
+  console.log("CSV headers:", headers);
+  
+  const result = [];
+  
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+    
+    const values = line.split(',');
+    if (values.length !== headers.length) {
+      console.warn(`Line ${i} has ${values.length} values but headers has ${headers.length}`);
+      continue;
+    }
+    
+    const obj: {[key: string]: any} = {};
+    
+    headers.forEach((header, index) => {
+      const value = values[index];
+      // Try to convert to number if possible
+      obj[header] = !isNaN(Number(value)) ? Number(value) : value;
+    });
+    
+    // Ensure latitude and longitude exist and are valid
+    if (obj.latitude !== undefined && obj.longitude !== undefined) {
+      result.push(obj);
+    } else {
+      console.warn("Missing latitude or longitude in CSV row:", obj);
+    }
+  }
+  
+  console.log("Parsed CSV data:", result);
+  return result;
+}
