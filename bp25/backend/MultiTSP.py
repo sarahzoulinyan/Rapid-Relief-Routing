@@ -93,3 +93,41 @@ def get_init_solution(grf: MultiDiGraph, starting_pts):
         # sub_path is the shortest path from last_node to next_node.
         # To avoid duplication, remove the first node (which equals last_node).
         extension = sub_path[1:]
+
+        # Extend the chosen route.l
+        routes[best_start].extend(extension)
+        route_lengths[best_start] += dist
+
+        # Mark all newly added nodes as visited.
+        visited.update(extension)
+
+    return routes, route_lengths, pure_routes
+
+def dist(G, a, b):
+    try:
+        return shortest_path_length(G, source=a, target=b, weight='length')
+    except:
+        return 1e18
+
+
+def anneal(G, routes, route_lengths, T):
+    """
+    Performs one annealing step on a set of routes.
+    There are two types of moves:
+      1. Intra-route reversal (with probability 0.2)
+      2. Node transfer (with probability 0.8)
+
+    The route_lengths dictionary is updated in a delta fashion.
+    """
+
+    # --- Intra-route reversal move ---
+    if random.random() < 0.2:
+        # Choose a random route key.
+        route_key = random.choice(list(routes.keys()))
+        route = routes[route_key]
+        L = len(route)
+        # Only proceed if the route has at least 4 nodes (to allow nontrivial reversal while keeping endpoints fixed)
+        if L >= 4:
+            # Choose indices l and r such that 0 < l < r < L-1.
+            l = random.randint(1, L - 3)
+            r = random.randint(l + 1, L - 2)
