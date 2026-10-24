@@ -207,3 +207,90 @@ def process_allocation():
                     buildings_with_colored_connections.add(source)
                 if target_node and target_node[1].get('node_type') == 'building':
                     buildings_with_colored_connections.add(target)
+
+        # Second pass: color any remaining building connections
+        for i, edge in enumerate(edges_data):
+            source = edge['source']
+            target = edge['target']
+            
+            # If this edge doesn't have a route color yet
+            if 'route_color' not in edge:
+                source_id = source.lstrip('-') if source.startswith('-') else source
+                target_id = target.lstrip('-') if target.startswith('-') else target
+                
+                source_in_route = source in node_to_route
+                target_in_route = target in node_to_route
+                
+                # If one end is a building in a route
+                if (source_in_route and source not in buildings_with_colored_connections and 
+                    graph.nodes[int(source_id) if source_id.isdigit() else source].get('node_type') == 'building'):
+                    route_id = node_to_route[source]
+                    edges_data[i]['route_id'] = str(route_id)
+                    edges_data[i]['route_color'] = route_colors[route_id]
+                    buildings_with_colored_connections.add(source)
+                    
+                elif (target_in_route and target not in buildings_with_colored_connections and 
+                      graph.nodes[int(target_id) if target_id.isdigit() else target].get('node_type') == 'building'):
+                    route_id = node_to_route[target]
+                    edges_data[i]['route_id'] = str(route_id)
+                    edges_data[i]['route_color'] = route_colors[route_id]
+                    buildings_with_colored_connections.add(target)
+        
+        # Prepare route data for frontend
+        routes_data = []
+        for route_id, node_list in routes.items():
+            routes_data.append({
+                'id': str(route_id),
+                'display_id': route_display_ids[route_id],
+                'nodes': [str(node) for node in node_list],
+                'color': route_colors[route_id],
+                'length': len(node_list)
+            })
+        
+        # Find fire stations within the bounding box
+        try:
+            # Query for fire stations using OSM tags
+            fire_stations = ox.features.features_from_bbox(
+                bbox[0], bbox[1], bbox[2], bbox[3],
+                tags={'amenity': 'fire_station'}
+            )
+            
+            fire_station_data = []
+            if not fire_stations.empty:
+                for idx, station in fire_stations.iterrows():
+                    if hasattr(station.geometry, 'centroid'):
+                        point = station.geometry.centroid
+                    else:
+                        point = station.geometry
+                        
+                    name = station.get('name', 'Fire Station')
+                    
+                    fire_station_data.append({
+                        'id': str(idx),
+                        'lat': point.y,
+                        'lng': point.x,
+                        'name': name
+                    })
+        except Exception as e:
+            print(f"Error fetching fire stations: {e}")
+            fire_station_data = []
+        
+        return jsonify({
+            "status": "success",
+            "message": f"Processed allocation for {location_name}",
+            "bbox": bbox,
+            "nodes_count": len(graph.nodes),
+            "edges_count": len(graph.edges),
+            "routes_count": len(routes),
+            "fire_stations": fire_station_data,
+            "graph_data": {
+                "nodes": nodes_data,
+                "edges": edges_data,
+                "routes": routes_data
+            }
+        })
+        
+    except Exception as e:
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
