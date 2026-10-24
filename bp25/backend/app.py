@@ -192,3 +192,18 @@ def process_allocation():
 
         # Track which building nodes have colored connections
         buildings_with_colored_connections = set()
+
+        # First pass: check which buildings already have colored connections
+        for edge in edges_data:
+            source = edge['source']
+            target = edge['target']
+            
+            # If this edge has a route color and connects to a building
+            if 'route_color' in edge:
+                source_node = next((n for n in graph.nodes(data=True) if str(n[0]) == source), None)
+                target_node = next((n for n in graph.nodes(data=True) if str(n[0]) == target), None)
+                
+                if source_node and source_node[1].get('node_type') == 'building':
+                    buildings_with_colored_connections.add(source)
+                if target_node and target_node[1].get('node_type') == 'building':
+                    buildings_with_colored_connections.add(target)
