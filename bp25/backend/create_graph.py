@@ -111,3 +111,29 @@ def create_graph(bounding_coords):
     next_id = -1  # Using negative numbers for building nodes so they don't conflict with OSM node IDs
     building_node_ids = []
     edges_to_add = []
+
+    # iterrr = 0
+    # For each building centroid, add it as a node and connect it to the nearest street node
+    for idx, row in buildings.iterrows():
+        # iterrr += 1
+        # if (iterrr % 100 == 0):
+        #     print(iterrr)
+        centroid = row['centroid']
+
+        # Check if the building is a fire station
+        # if (centroid.x, centroid.y) in fire_station_coords:
+        #     node_type = 'fire_station'
+        # else:
+        #     node_type = 'building'
+        node_type = 'building'
+
+        # Create a unique node id (e.g., negative id)
+        bnode = next_id
+        next_id -= 1  # decrement for next unique id
+        building_node_ids.append(bnode)
+
+        # Add the building centroid as a node with attributes: geometry, x, y, and a custom tag
+        G_combined.add_node(bnode, x=centroid.x, y=centroid.y, node_type=node_type)
+        building_node_id, projection_node_id, leng, perp_line = add_perp(G_combined, bnode)
+        edges_to_add.append((building_node_id, projection_node_id, leng, perp_line))
+
