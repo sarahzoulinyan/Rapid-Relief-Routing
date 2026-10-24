@@ -20,3 +20,7 @@ import osmnx as ox
 
 app = Flask(__name__)
 CORS(app)
+
+@app.route('/api/health')
+def health_check():
+    return jsonify({"status": "healthy"})
