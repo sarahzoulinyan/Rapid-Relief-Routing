@@ -91,3 +91,9 @@ def process_allocation():
             routes_converted = {}
             pure_routes_converted = {}
             route_lengths_converted = {}
+
+            for key in routes:
+                python_key = float(key) if hasattr(key, 'dtype') else key
+                routes_converted[python_key] = routes[key]
+                pure_routes_converted[python_key] = pure_routes[key]
+                route_lengths_converted[python_key] = route_lengths[key]
