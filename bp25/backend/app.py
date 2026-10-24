@@ -176,3 +176,16 @@ def process_allocation():
                     if node in node_to_route and graph.nodes[node].get('node_type') == 'building':
                         building_node = node
                         break
+
+                if building_node is not None:
+                    # This edge connects to a building in a route, color it
+                    route_id = node_to_route[building_node]
+                    edge_info['route_id'] = str(route_id)
+                    edge_info['route_color'] = route_colors[route_id]
+                    edges_with_route_color += 1
+                
+                edges_data.append(edge_info)
+        
+        # After processing all edges, check if any building nodes in routes don't have colored connections
+        building_nodes_in_routes = {node_id for node_id, node_data in graph.nodes(data=True) 
+                                   if node_data.get('node_type') == 'building' and node_id in node_to_route}
