@@ -27,3 +27,49 @@ To obtain a sufficiently optimal base solution, we code a custom greedy algorith
 Although this static approach is good, fires and other natural disasters are extremely dynamic environments, with roads suddenly becoming inaccessible. To account for this, every time our graph is updated with new information, we run a **mini simulated annealing** (i.e. re-raising the temperature slightly) to let the routing converge to a new local minimum efficiently. 
 
 In fire-affected areas, nodes within the impacted radius are automatically removed, ensuring teams avoid hazardous zones and focus their efforts on reachable locations. This allows for real-time adaptability to changing disaster conditions, improving safety and efficiency.
+
+Additionally, responders can manually delete nodes and edges, updating the map to reflect roadblocks, damaged structures, or newly accessible paths. This level of customization ensures that emergency teams can quickly adjust their strategies, responding with greater precision.
+
+By integrating these features, our system enhances emergency response efforts in order to maximize the impact of relief operations.
+
+
+## How we built it
+
+### Frontend:
+* **React Leaflet:**
+    * Overlay on map, to display nodes and edges, geocoding locations
+* **React.js:**
+    * Frontend was built using React
+
+### Backend
+* **Flask:**
+    * Used for backend
+* **OSMNX:**
+    * Generates graphical data using StreetView
+* **NetworkX:**
+    * Managing graph data structures
+* **Algorithms using Python:**
+    * Simulated Annealing
+    * Dijkstra’s Algorithm
+    * Greedy Algorithms
+* **FIRMS API:**
+    * Used to have live updates for fires, and also used to calculate approximate radius of fires
+
+
+## Challenges we ran into
+
+#### Simulated Annealing
+
+The simulated annealing was difficult to get to converge. Initially, we only considered the range reversal operations, but we had to add Inter and Intra route swapping to truly make the simulated annealing approach work effectively.
+
+#### One-Way Roads
+
+Ideally, the path from Point A to B should be the same as from B to A. However, one-way roads created errors in our model. We resolved this issue by disregarding one-way restrictions, as emergency vehicles can bypass them when necessary. This issue took a very long time to debug :(
+
+#### Connecting Roads to Buildings
+
+It’s necessary to connect buildings to the closest roads to add them to the graph, but this required us to introduce extraneous “projection” nodes in our graph and use extensive linear algebra to properly make this approach function
+
+#### FIRMS API
+
+Due to time constraints, we weren’t able to fully incorporate real-time updated wildfire data. However we were still able to use old “up to date” data.
