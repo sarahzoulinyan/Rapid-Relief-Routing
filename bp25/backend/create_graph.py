@@ -83,3 +83,31 @@ def create_graph(bounding_coords):
 
     for edge in edges_to_add:
         G.add_edge(edge[0], edge[1], length=edge[2])
+
+    # print(G.nodes)
+    # print("Downloaded street network.")
+
+    # Download building footprints in the same area as a GeoDataFrame
+    buildings = ox.features_from_bbox((west, south, east, north), tags={'building': True})
+    # print(buildings.geometry.centroid)
+    # print("Downloaded building footprints.")
+
+    # Download fire stations in the same area as a GeoDataFrame
+    # fire_stations = ox.features_from_bbox((west, south, east, north), tags={'amenity': 'fire_station'})
+    # fire_station_coords = set((row.geometry.centroid.x, row.geometry.centroid.y) for idx, row in fire_stations.iterrows())
+
+    # Determine an appropriate UTM CRS for the buildings
+    buildings_crs = buildings.to_crs(3857)
+    buildings_crs['centroid'] = buildings_crs.geometry.centroid
+    buildings['centroid'] = buildings_crs['centroid'].to_crs(buildings.crs)
+    # print("Reprojected centroids back to original CRS.")
+
+    # Create a copy of G so we can add building nodes
+    G_combined = G.copy()
+
+    next_id = -1
+
+    # Create a list to hold building node ids for further processing
+    next_id = -1  # Using negative numbers for building nodes so they don't conflict with OSM node IDs
+    building_node_ids = []
+    edges_to_add = []
