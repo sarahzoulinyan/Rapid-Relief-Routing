@@ -34,3 +34,29 @@ def nearest_unvisited_node(grf: MultiDiGraph, start, visited):
             # The path is currently from curr_node back to start, so reverse it.
             path.reverse()
             return curr_node, curr_dist, path
+
+        # If we already found a shorter distance to curr_node, skip.
+        if curr_dist > distances[curr_node]:
+            continue
+
+        for next_node in grf.neighbors(curr_node):
+            edge_data = grf.get_edge_data(curr_node, next_node)[0]
+            # Assume each edge has a key 'length'
+
+            new_dist = curr_dist + edge_data['length']
+            if new_dist < distances[next_node]:
+                distances[next_node] = new_dist
+                prev[next_node] = curr_node
+                try:
+                    heapq.heappush(pq, (new_dist, str(next_node)))
+                except:
+                    # print(new_dist, next_node)
+                    pass
+    # If no unvisited building is found:
+    return None
+
+
+def get_init_solution(grf: MultiDiGraph, starting_pts):
+    """
+    Greedy initialization for multi-party TSP.
+    starting_pts: list of nodes that serve as initial starting points for separate routes.
