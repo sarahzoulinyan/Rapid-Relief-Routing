@@ -191,3 +191,26 @@ def anneal(G, routes, route_lengths, T):
             added_dest = dist(G, new_route[dest_idx - 1], node_to_move) + \
                          dist(G, node_to_move, new_route[dest_idx])
             delta_insert = added_dest - removed_dest
+
+            # Total change in route length.
+            delta = delta_remove + delta_insert
+
+            # Accept the move if it improves or with probability exp(-delta/T).
+            if delta < 0 or random.random() < exp(-delta / T):
+                # Update the route: insert the node at the new position.
+                routes[largest_key] = new_route[:dest_idx] + [node_to_move] + new_route[dest_idx:]
+                # Update the route length.
+                route_lengths[largest_key] += delta
+        else:
+            # --- Inter-route move ---
+            source_route = routes[largest_key]
+            if len(source_route) < 3:
+                return  # Not enough nodes to remove.
+            # Choose a random node index (not endpoints) to remove from the source (largest) route.
+            orig_idx = random.randint(1, len(source_route) - 2)
+            node_to_move = source_route[orig_idx]
+            # Compute delta for removal from the source route:
+            removed_source = dist(G, source_route[orig_idx - 1], source_route[orig_idx]) + \
+                             dist(G, source_route[orig_idx], source_route[orig_idx + 1])
+            added_source = dist(G, source_route[orig_idx - 1], source_route[orig_idx + 1])
+            delta_remove = added_source - removed_source
