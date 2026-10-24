@@ -175,3 +175,19 @@ def anneal(G, routes, route_lengths, T):
             if len(new_route) < 3:
                 return  # Safety check.
             dest_idx = random.randint(1, len(new_route) - 1)
+
+            # Compute delta for removal from the original route:
+            # Removed edges: (src[orig_idx-1] -> src[orig_idx]) and (src[orig_idx] -> src[orig_idx+1])
+            removed_source = dist(G, src_route[orig_idx - 1], src_route[orig_idx]) + \
+                             dist(G, src_route[orig_idx], src_route[orig_idx + 1])
+            # Added edge: (src[orig_idx-1] -> src[orig_idx+1])
+            added_source = dist(G, src_route[orig_idx - 1], src_route[orig_idx + 1])
+            delta_remove = added_source - removed_source  # (Typically negative if removal shortens the route)
+
+            # Compute delta for insertion into new_route:
+            # In new_route, the edge currently from new_route[dest_idx-1] to new_route[dest_idx] will be removed,
+            # and replaced by two edges: (new_route[dest_idx-1] -> node_to_move) and (node_to_move -> new_route[dest_idx]).
+            removed_dest = dist(G, new_route[dest_idx - 1], new_route[dest_idx])
+            added_dest = dist(G, new_route[dest_idx - 1], node_to_move) + \
+                         dist(G, node_to_move, new_route[dest_idx])
+            delta_insert = added_dest - removed_dest
