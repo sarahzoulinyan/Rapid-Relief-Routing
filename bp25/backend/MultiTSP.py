@@ -265,3 +265,41 @@ def get_actual_solution(G, starting_pts):
     old_max = max(route_lengths.values())
     new_pure_routes, new_route_lengths = simulated_annealing(G, pure_routes, route_lengths)
     new_max = max(route_lengths.values())
+
+    new_routes, _ = gen_route_from_pure(G, new_pure_routes)
+    for pt in starting_pts:
+        new_pure_routes[pt].append(pt)
+        lst = new_routes[pt][-1]
+        new_routes[pt].pop()
+        new_routes[pt].extend(shortest_path(G, lst, pt))
+
+    print(new_max / old_max)
+    return new_routes, new_pure_routes, new_route_lengths
+
+# Example usage:
+if __name__ == "__main__":
+    # Assume create_graph() creates a networkx.MultiDiGraph with proper "node_type" attributes
+    north, south, east, west = 34.1418976, 34.13, -118.1330033, -118.14
+    bbox = (north, south, east, west)
+
+    print("Creating Graph")
+
+    grf = create_graph(bbox)
+
+    print("Finished Creating Graph")
+    # List of starting points (for instance, predetermined nodes)
+
+    starting_pts = random.sample([n for n, dat in grf.nodes(data=True) if dat.get('node_type') == 'building'], 5)
+
+    print("Getting Routes")
+    routes, pure_routes, route_lengths = get_actual_solution(grf, starting_pts)
+
+    for start, route in routes.items():
+        print(f"Route starting at {start}: {route}")
+        print(f"Total length: {route_lengths[start]}")
+
+    # print("STARTING SIMULATED ANNEALING")
+    # pure_routes, route_lengths = simulated_annealing(grf, pure_routes, route_lengths)
+    # for i in pure_routes:
+    #     print(pure_routes[i])
+    #     print(route_lengths[i])
