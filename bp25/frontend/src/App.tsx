@@ -1134,3 +1134,5 @@ function App() {
     </ChakraProvider>
   );
 }
+
+export default App;
