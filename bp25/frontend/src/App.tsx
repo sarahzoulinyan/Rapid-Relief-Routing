@@ -703,3 +703,9 @@ function App() {
       setIsLoading(false);
     }
   };
+
+  const processAllocation = async () => {
+    if (!boundingBox) {
+      setProcessingError('No area selected for processing');
+      return;
+    }
