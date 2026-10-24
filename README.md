@@ -103,3 +103,17 @@ There should fire stations for evacuation purposes in the bounding box. However,
 Our program relied heavily on the representation and formulation of real-world problems in a way that could be programmatically understood through graph traversals. 
 
 We learned how to effectively use simulated annealing to properly address the traveling salesman problem.
+
+We learned how to use Flask in conjunction with a Python backend to effectively make a coherent architecture.
+
+We learned about interactions between real world data and how to incorporate that into a dynamically updating system. Furthermore, we worked on how different requests worked in conjunction with scripts in the backend.
+
+
+## What's next for our project
+We plan to expand our project to recognize other types of disasters, such as flooding. For instance, in cases of flooding, we would remove nodes from areas with high water elevation or low geographical elevation in places where vehicles and people are more likely in critical danger. We hope to enhance our platform’s adaptability, ensuring it can effectively assist emergency responders in various disaster scenarios. 
+
+In addition, due to time constraints we weren’t able to fully incorporate dynamic updating of wildfire data. While we were able to use some wildfire data from Nasa Fire Information Resource Management System on the spread of wildfires, this wasn’t dynamically updated. Moreover, while our system is largely responsive, future work could include taking into account a risk index to natural disaster to also be able to shift to preventative action. 
+
+Additionally, we thought about adding an AR/VR component to allow emergency responders to navigate their communities before these events even happen, improving preparation. Just as we conduct fire drills and establish fire escape plans, this feature could help responders simulate disaster scenarios and plan accordingly. For example, while an emergency response vehicle is moving onto the scene, they would be able to see through a display the suggested course of navigation. 
+
+Another idea for expansion is refining our designated boundaries. Instead of using a simple rectangular area, we aim to implement a more custom polygonal boundary system, increasing the precision of coverage and resource allocation.
