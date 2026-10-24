@@ -511,3 +511,59 @@ async function findHighestRiskLocation(lat: number, lng: number, radius: number 
     return highestRiskLocation;
   }
 }
+
+function AboutPage({ onClose }: { onClose: () => void }) {
+  return (
+    <Box
+      position="fixed"
+      top="0"
+      left="0"
+      right="0"
+      bottom="0"
+      bg="rgba(0,0,0,0.7)"
+      zIndex={1000}
+      display="flex"
+      alignItems="center"
+      justifyContent="center"
+      p={4}
+      onClick={onClose}
+    >
+      <Box
+        bg="white"
+        borderRadius="lg"
+        p={8}
+        maxWidth="800px"
+        maxHeight="90vh"
+        overflowY="auto"
+        onClick={(e) => e.stopPropagation()}
+        boxShadow="xl"
+      >
+        <Heading as="h2" size="xl" mb={6} color="teal.600" textAlign="center">
+          About Dispatch Services
+        </Heading>
+        
+        <Text fontSize="lg" mb={6} lineHeight="tall">
+          Natural disasters take the front page of the news constantly. They are relentless, unpredictable, and difficult to manage. 
+          In times of crisis, efficient response efforts can mean the difference between life and death. In the most recent LA wildfires, 
+          29 people passed away with countless more experiencing casualties. Inefficient responses to natural crises like these can result 
+          in families losing loved ones as well as the destruction that could have been prevented. Witnessing the devastation caused by 
+          these tragic events motivated us to create a system that helps emergency services allocate resources effectively to mitigate 
+          damage and prioritize safety.
+        </Text>
+        
+        <Text fontSize="lg" mb={8} lineHeight="tall">
+          When disaster strikes, responders need a clear strategy to ensure help reaches those in need as quickly as possible. 
+          However, the chaotic nature of emergencies often makes real-time decision-making difficult. Our project aims to bridge 
+          this gap by optimizing emergency response through a responsive mapping system that enables emergency responders to 
+          strategically deploy resources, ensuring faster and more effective aid distribution.
+        </Text>
+        
+        <Flex justifyContent="center">
+          <Button colorScheme="teal" size="lg" onClick={onClose}>
+            Close
+          </Button>
+        </Flex>
+      </Box>
+    </Box>
+  );
+}
