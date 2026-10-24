@@ -97,3 +97,12 @@ def process_allocation():
                 routes_converted[python_key] = routes[key]
                 pure_routes_converted[python_key] = pure_routes[key]
                 route_lengths_converted[python_key] = route_lengths[key]
+
+            routes = routes_converted
+            pure_routes = pure_routes_converted
+            route_lengths = route_lengths_converted
+            
+            node_to_route = {}
+            for route_id, nodes in routes.items():
+                for node in nodes:
+                    node_to_route[node] = route_id
