@@ -653,3 +653,53 @@ function MethodologyPage({ onClose }: { onClose: () => void }) {
     </Box>
   );
 }
+
+function App() {
+  const [location, setLocation] = useState('');
+  const [mapLocation, setMapLocation] = useState<[number, number] | null>(null);
+  const [locationName, setLocationName] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [boundingBox, setBoundingBox] = useState<[[number, number], [number, number]] | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingError, setProcessingError] = useState('');
+  const [allocationResult, setAllocationResult] = useState<any>(null);
+  const [fires, setFires] = useState<any[]>([]);
+  const [isLoadingFires, setIsLoadingFires] = useState(false);
+  const [fireError, setFireError] = useState('');
+  const [showAbout, setShowAbout] = useState(false);
+  const [showMethodology, setShowMethodology] = useState(false);
+
+  const handleSearch = async () => {
+    if (!location.trim()) {
+      setError('Please enter a location');
+      return;
+    }
+    
+    setIsLoading(true);
+    setError('');
+    setAllocationResult(null);
+    
+    try {
+      // Using OpenStreetMap's Nominatim API for geocoding
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(location)}`);
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        const { lat, lon, display_name } = data[0];
+        const parsedLat = parseFloat(lat);
+        const parsedLon = parseFloat(lon);
+        
+        setMapLocation([parsedLat, parsedLon]);
+        setLocationName(display_name);
+      } else {
+        setError('Location not found. Please try a different search term.');
+        setMapLocation(null);
+      }
+    } catch (err) {
+      setError('Error searching for location. Please try again.');
+      console.error('Geocoding error:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
